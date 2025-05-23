@@ -11,29 +11,67 @@ def load_tasks():
         with open(DATA_FILE, "r") as f:
             return json.load(f)
     return []
+
 def save_tasks(tasks):
     with open(DATA_FILE, "w") as f:
         json.dump(tasks, f, indent=2)
 
+def remove_extra(task):
+    return task.replace(" | Not Complete Yet", "").replace(" | Completed!", "").strip()
+
 
 @app.command()
 def add(task: str):
+    """
+    Adds a task to the To-Do list (Cannot be an existing task)
+    """
     tasks = load_tasks()
-    if task in tasks:
+    if task + " | Not Completed" in tasks or task + " | Completed" in tasks:
         print("Task has already been added, pick another name")
     else:
         print(f"Added {task} to list")
-        tasks.append(task)
+        tasks.append(task + " | Not Completed")
         save_tasks(tasks)
+
+
 @app.command()
 def remove(task: str):
+    """
+    Removes a task from the To-Do list (Must already be on the list)
+    """
     tasks = load_tasks()
-    if task in tasks:
-        print(f"Removed {task} from list")
-        tasks.remove(task)
-        save_tasks(tasks)
+    for t in tasks:
+        if remove_extra(t) == task:
+            tasks.remove(t)
+            save_tasks(tasks)
+            print(f"Removed '{task}' from list")
+            return
+    print(f"No task named {task} found")
+
+
 @app.command()
+def complete(task: str):
+    """
+    Changes the status of a task from "Not Complete" to "Completed"
+    """
+    tasks = load_tasks()
+    for t in tasks:
+        if remove_extra(t) and t.endswith(" | Not Completed"):
+            tasks.remove(t)
+            completed_task = remove_extra(task) + " | Completed!"
+            tasks.append(completed_task)
+            save_tasks(tasks)
+            print(f"Marked {task} as completed")
+            return
+    print(f'No incomplete task named {task}')    
+
+
+@app.command()
+
 def list():
+    """
+    Lists all tasks in list
+    """
     tasks = load_tasks()
     if tasks:
         print("Tasks:")
