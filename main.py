@@ -1,10 +1,11 @@
-import typer
-import json
+import typer, json
 from pathlib import Path
 
+DATA_DIR = Path.home() / "Appdata" / "Local" / "tskgdata"
+DATA_DIR.mkdir(parents=True, exist_ok=True)  
+DATA_FILE = DATA_DIR / "tasks.json"
 
 app = typer.Typer()
-DATA_FILE = Path("tasks.json")
 
 def load_tasks():
     if DATA_FILE.exists():
@@ -79,7 +80,3 @@ def list():
             print(f"{tid}. {task}")
     else:
         print("No tasks found")
-
-
-if __name__ == '__main__':
-    app()
